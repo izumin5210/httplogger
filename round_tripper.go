@@ -10,8 +10,8 @@ type loggingTransport struct {
 	parent http.RoundTripper
 }
 
-// New returns new RoundTripper instance for logging http request and response
-func New(out io.Writer, parent http.RoundTripper) http.RoundTripper {
+// NewRoundTripper returns new RoundTripper instance for logging http request and response
+func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
 		logger: NewLogger(out),
 		parent: parent,
