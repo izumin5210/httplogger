@@ -13,7 +13,8 @@ import (
 
 type keyRequestedAt struct{}
 
-type logger interface {
+// Logger is interface for logging http request
+type Logger interface {
 	LogRequest(req *http.Request) *http.Request
 	LogResponse(resp *http.Response)
 }
@@ -22,7 +23,8 @@ type loggerImpl struct {
 	logger *log.Logger
 }
 
-func newLogger(out io.Writer) logger {
+// NewLogger returns new Logger instance
+func NewLogger(out io.Writer) Logger {
 	return &loggerImpl{
 		logger: log.New(out, "", log.LstdFlags),
 	}
