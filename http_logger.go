@@ -20,7 +20,7 @@ type httpLogger interface {
 }
 
 type httpLoggerImpl struct {
-	logger *log.Logger
+	logger Logger
 }
 
 func newHTTPLogger(out io.Writer) httpLogger {
