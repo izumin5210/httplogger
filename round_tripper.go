@@ -6,14 +6,14 @@ import (
 )
 
 type loggingTransport struct {
-	logger Logger
+	logger httpLogger
 	parent http.RoundTripper
 }
 
 // NewRoundTripper returns new RoundTripper instance for logging http request and response
 func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
-		logger: NewLogger(out),
+		logger: newHTTPLogger(out),
 		parent: parent,
 	}
 }

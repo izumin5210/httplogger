@@ -13,31 +13,30 @@ import (
 
 type keyRequestedAt struct{}
 
-// Logger is interface for logging http request
-type Logger interface {
+// httpLogger is interface for logging http request
+type httpLogger interface {
 	LogRequest(req *http.Request) *http.Request
 	LogResponse(resp *http.Response)
 }
 
-type loggerImpl struct {
+type httpLoggerImpl struct {
 	logger *log.Logger
 }
 
-// NewLogger returns new Logger instance
-func NewLogger(out io.Writer) Logger {
-	return &loggerImpl{
+func newHTTPLogger(out io.Writer) httpLogger {
+	return &httpLoggerImpl{
 		logger: log.New(out, "", log.LstdFlags),
 	}
 }
 
-func (l *loggerImpl) LogRequest(req *http.Request) *http.Request {
+func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
 	l.logger.SetPrefix("[http] --> ")
 	dump, _ := httputil.DumpRequest(req, true)
 	l.logger.Printf("%s", string(dump))
 	return setRequestedAt(req)
 }
 
-func (l *loggerImpl) LogResponse(resp *http.Response) {
+func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
 	dump, _ := httputil.DumpResponse(resp, true)
 	lines := strings.Split(string(dump), "\n")
 	lines[0] = fmt.Sprintf("%s (%dms)", lines[0], getRespTimeInMillis(resp))
