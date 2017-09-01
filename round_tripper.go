@@ -13,7 +13,15 @@ type loggingTransport struct {
 // NewRoundTripper returns new RoundTripper instance for logging http request and response
 func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
-		logger: newHTTPLogger(out),
+		logger: defaultHTTTPLogger(out),
+		parent: parent,
+	}
+}
+
+// WithLogger creates new logging RoundTripper instance with given logger
+func WithLogger(logger Logger, parent http.RoundTripper) http.RoundTripper {
+	return &loggingTransport{
+		logger: newHTTPLogger(logger),
 		parent: parent,
 	}
 }

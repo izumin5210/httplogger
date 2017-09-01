@@ -23,9 +23,13 @@ type httpLoggerImpl struct {
 	logger Logger
 }
 
-func newHTTPLogger(out io.Writer) httpLogger {
+func defaultHTTTPLogger(out io.Writer) httpLogger {
+	return newHTTPLogger(log.New(out, "", log.LstdFlags))
+}
+
+func newHTTPLogger(logger Logger) httpLogger {
 	return &httpLoggerImpl{
-		logger: log.New(out, "", log.LstdFlags),
+		logger: logger,
 	}
 }
 
