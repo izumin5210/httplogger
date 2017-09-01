@@ -24,7 +24,7 @@ type httpLoggerImpl struct {
 }
 
 func defaultHTTTPLogger(out io.Writer) httpLogger {
-	return newHTTPLogger(log.New(out, "", log.LstdFlags))
+	return newHTTPLogger(log.New(out, "[http] ", log.LstdFlags))
 }
 
 func newHTTPLogger(logger Logger) httpLogger {
@@ -34,17 +34,15 @@ func newHTTPLogger(logger Logger) httpLogger {
 }
 
 func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
-	l.logger.SetPrefix("[http] --> ")
 	dump, _ := httputil.DumpRequest(req, true)
-	l.logger.Printf("%s", string(dump))
+	l.logger.Printf("--> %s", string(dump))
 	return setRequestedAt(req)
 }
 
 func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
 	dump, _ := httputil.DumpResponse(resp, true)
 	lines := strings.Split(string(dump), "\n")
-	lines[0] = fmt.Sprintf("%s (%dms)", lines[0], getRespTimeInMillis(resp))
-	l.logger.SetPrefix("[http] <-- ")
+	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], getRespTimeInMillis(resp))
 	l.logger.Print(strings.Join(lines, "\n"))
 }
 
