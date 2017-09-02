@@ -45,9 +45,9 @@ func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
 
 func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
 	dump, _ := httputil.DumpResponse(resp, true)
-	lines := strings.Split(string(dump), "\n")
+	lines := strings.Split(string(dump), "\r\n")
 	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], getRespTimeInMillis(resp))
-	l.logger.Print(strings.Join(lines, "\n"))
+	l.logger.Print(strings.Join(lines, "\r\n"))
 }
 
 func setRequestedAt(req *http.Request) *http.Request {
