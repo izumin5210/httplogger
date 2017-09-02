@@ -2,18 +2,27 @@ package httplogger
 
 import (
 	"io"
+	"log"
 	"net/http"
 )
 
 type loggingTransport struct {
-	logger Logger
+	logger httpLogger
 	parent http.RoundTripper
 }
 
 // NewRoundTripper returns new RoundTripper instance for logging http request and response
 func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
-		logger: NewLogger(out),
+		logger: defaultHTTTPLogger(out),
+		parent: parent,
+	}
+}
+
+// FromLogger creates new logging RoundTripper instance with given logger
+func FromLogger(logger *log.Logger, parent http.RoundTripper) http.RoundTripper {
+	return &loggingTransport{
+		logger: newHTTPLogger(logger),
 		parent: parent,
 	}
 }

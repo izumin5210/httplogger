@@ -13,36 +13,41 @@ import (
 
 type keyRequestedAt struct{}
 
-// Logger is interface for logging http request
-type Logger interface {
+const (
+	defaultPrefix = "[http] "
+)
+
+// httpLogger is interface for logging http request
+type httpLogger interface {
 	LogRequest(req *http.Request) *http.Request
 	LogResponse(resp *http.Response)
 }
 
-type loggerImpl struct {
+type httpLoggerImpl struct {
 	logger *log.Logger
 }
 
-// NewLogger returns new Logger instance
-func NewLogger(out io.Writer) Logger {
-	return &loggerImpl{
-		logger: log.New(out, "", log.LstdFlags),
+func defaultHTTTPLogger(out io.Writer) httpLogger {
+	return newHTTPLogger(log.New(out, defaultPrefix, log.LstdFlags))
+}
+
+func newHTTPLogger(logger *log.Logger) httpLogger {
+	return &httpLoggerImpl{
+		logger: logger,
 	}
 }
 
-func (l *loggerImpl) LogRequest(req *http.Request) *http.Request {
-	l.logger.SetPrefix("[http] --> ")
+func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
 	dump, _ := httputil.DumpRequest(req, true)
-	l.logger.Printf("%s", string(dump))
+	l.logger.Printf("--> %s", string(dump))
 	return setRequestedAt(req)
 }
 
-func (l *loggerImpl) LogResponse(resp *http.Response) {
+func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
 	dump, _ := httputil.DumpResponse(resp, true)
-	lines := strings.Split(string(dump), "\n")
-	lines[0] = fmt.Sprintf("%s (%dms)", lines[0], getRespTimeInMillis(resp))
-	l.logger.SetPrefix("[http] <-- ")
-	l.logger.Print(strings.Join(lines, "\n"))
+	lines := strings.Split(string(dump), "\r\n")
+	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], getRespTimeInMillis(resp))
+	l.logger.Print(strings.Join(lines, "\r\n"))
 }
 
 func setRequestedAt(req *http.Request) *http.Request {
