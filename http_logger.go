@@ -13,6 +13,10 @@ import (
 
 type keyRequestedAt struct{}
 
+const (
+	defaultPrefix = "[http] "
+)
+
 // httpLogger is interface for logging http request
 type httpLogger interface {
 	LogRequest(req *http.Request) *http.Request
@@ -24,7 +28,7 @@ type httpLoggerImpl struct {
 }
 
 func defaultHTTTPLogger(out io.Writer) httpLogger {
-	return newHTTPLogger(log.New(out, "[http] ", log.LstdFlags))
+	return newHTTPLogger(log.New(out, defaultPrefix, log.LstdFlags))
 }
 
 func newHTTPLogger(logger *log.Logger) httpLogger {
