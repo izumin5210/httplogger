@@ -19,8 +19,8 @@ func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper 
 	}
 }
 
-// WithLogger creates new logging RoundTripper instance with given logger
-func WithLogger(logger *log.Logger, parent http.RoundTripper) http.RoundTripper {
+// FromLogger creates new logging RoundTripper instance with given logger
+func FromLogger(logger *log.Logger, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
 		logger: newHTTPLogger(logger),
 		parent: parent,
