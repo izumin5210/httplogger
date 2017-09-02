@@ -2,6 +2,7 @@ package httplogger
 
 import (
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -19,7 +20,7 @@ func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper 
 }
 
 // WithLogger creates new logging RoundTripper instance with given logger
-func WithLogger(logger Logger, parent http.RoundTripper) http.RoundTripper {
+func WithLogger(logger *log.Logger, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
 		logger: newHTTPLogger(logger),
 		parent: parent,

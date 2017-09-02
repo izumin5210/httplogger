@@ -20,14 +20,14 @@ type httpLogger interface {
 }
 
 type httpLoggerImpl struct {
-	logger Logger
+	logger *log.Logger
 }
 
 func defaultHTTTPLogger(out io.Writer) httpLogger {
 	return newHTTPLogger(log.New(out, "[http] ", log.LstdFlags))
 }
 
-func newHTTPLogger(logger Logger) httpLogger {
+func newHTTPLogger(logger *log.Logger) httpLogger {
 	return &httpLoggerImpl{
 		logger: logger,
 	}
