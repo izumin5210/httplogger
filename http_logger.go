@@ -39,7 +39,7 @@ func newHTTPLogger(writer LogWriter) httpLogger {
 
 func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
 	dump, _ := httputil.DumpRequest(req, true)
-	l.writer.Println(fmt.Sprintf("--> %s", string(dump)))
+	l.writer.Println(fmt.Sprintf("--> %s", strings.Replace(string(dump), "\r\n", "\n", -1)))
 	return setRequestedAt(req)
 }
 
@@ -47,7 +47,7 @@ func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
 	dump, _ := httputil.DumpResponse(resp, true)
 	lines := strings.Split(string(dump), "\r\n")
 	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], getRespTimeInMillis(resp))
-	l.writer.Println(strings.Join(lines, "\r\n"))
+	l.writer.Println(strings.Join(lines, "\n"))
 }
 
 func setRequestedAt(req *http.Request) *http.Request {
