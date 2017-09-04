@@ -24,22 +24,22 @@ type httpLogger interface {
 }
 
 type httpLoggerImpl struct {
-	logger *log.Logger
+	writer LogWriter
 }
 
 func defaultHTTTPLogger(out io.Writer) httpLogger {
 	return newHTTPLogger(log.New(out, defaultPrefix, log.LstdFlags))
 }
 
-func newHTTPLogger(logger *log.Logger) httpLogger {
+func newHTTPLogger(writer LogWriter) httpLogger {
 	return &httpLoggerImpl{
-		logger: logger,
+		writer: writer,
 	}
 }
 
 func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
 	dump, _ := httputil.DumpRequest(req, true)
-	l.logger.Printf("--> %s", string(dump))
+	l.writer.Println(fmt.Sprintf("--> %s", string(dump)))
 	return setRequestedAt(req)
 }
 
@@ -47,7 +47,7 @@ func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
 	dump, _ := httputil.DumpResponse(resp, true)
 	lines := strings.Split(string(dump), "\r\n")
 	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], getRespTimeInMillis(resp))
-	l.logger.Print(strings.Join(lines, "\r\n"))
+	l.writer.Println(strings.Join(lines, "\r\n"))
 }
 
 func setRequestedAt(req *http.Request) *http.Request {
