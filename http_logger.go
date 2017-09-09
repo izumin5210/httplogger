@@ -44,6 +44,9 @@ func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
 }
 
 func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
+	if resp == nil {
+		return
+	}
 	dump, _ := httputil.DumpResponse(resp, true)
 	lines := strings.Split(string(dump), "\r\n")
 	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], getRespTimeInMillis(resp))
