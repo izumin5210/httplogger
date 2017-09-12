@@ -39,7 +39,7 @@ func Test_LoggerRoundTripper(t *testing.T) {
 		{
 			prefix: "[httplogger] ",
 			createRoundTripper: func(out io.Writer, prefix string) http.RoundTripper {
-				return FromLogger(log.New(out, prefix, log.LstdFlags), nil)
+				return FromSimpleLogger(log.New(out, prefix, log.LstdFlags), nil)
 			},
 		},
 	}
