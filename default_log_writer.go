@@ -12,32 +12,26 @@ const (
 	defaultPrefix = "[http] "
 )
 
-// httpLogger is interface for logging http request
-type httpLogger interface {
-	LogRequest(reqLog *RequestLog)
-	LogResponse(respLog *ResponseLog)
+type defaultLogWriter struct {
+	writer SimpleLogWriter
 }
 
-type httpLoggerImpl struct {
-	writer LogWriter
+func newDefaultLogWriter(out io.Writer) LogWriter {
+	return wrapSimpleLogWriter(log.New(out, defaultPrefix, log.LstdFlags))
 }
 
-func defaultHTTTPLogger(out io.Writer) httpLogger {
-	return newHTTPLogger(log.New(out, defaultPrefix, log.LstdFlags))
-}
-
-func newHTTPLogger(writer LogWriter) httpLogger {
-	return &httpLoggerImpl{
+func wrapSimpleLogWriter(writer SimpleLogWriter) LogWriter {
+	return &defaultLogWriter{
 		writer: writer,
 	}
 }
 
-func (l *httpLoggerImpl) LogRequest(reqLog *RequestLog) {
+func (l *defaultLogWriter) PrintRequest(reqLog *RequestLog) {
 	dump, _ := httputil.DumpRequest(reqLog.Request, true)
 	l.writer.Println(fmt.Sprintf("--> %s", strings.Replace(string(dump), "\r\n", "\n", -1)))
 }
 
-func (l *httpLoggerImpl) LogResponse(respLog *ResponseLog) {
+func (l *defaultLogWriter) PrintResponse(respLog *ResponseLog) {
 	if respLog.Response == nil {
 		return
 	}

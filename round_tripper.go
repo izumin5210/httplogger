@@ -7,22 +7,22 @@ import (
 )
 
 type loggingTransport struct {
-	logger httpLogger
+	writer LogWriter
 	parent http.RoundTripper
 }
 
 // NewRoundTripper returns new RoundTripper instance for logging http request and response
 func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
-		logger: defaultHTTTPLogger(out),
+		writer: newDefaultLogWriter(out),
 		parent: parent,
 	}
 }
 
 // FromLogger creates new logging RoundTripper instance with given log writer
-func FromLogger(writer LogWriter, parent http.RoundTripper) http.RoundTripper {
+func FromLogger(writer SimpleLogWriter, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
-		logger: newHTTPLogger(writer),
+		writer: wrapSimpleLogWriter(writer),
 		parent: parent,
 	}
 }
@@ -45,12 +45,12 @@ func (lt *loggingTransport) CancelRequest(req *http.Request) {
 
 func (lt *loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	requestedAt := time.Now()
-	lt.logger.LogRequest(&RequestLog{Request: req, RequestedAt: requestedAt})
+	lt.writer.PrintRequest(&RequestLog{Request: req, RequestedAt: requestedAt})
 
 	resp, err := lt.parentTransport().RoundTrip(req)
 
 	respTime := time.Since(requestedAt)
-	lt.logger.LogResponse(&ResponseLog{Response: resp, DurationNano: respTime.Nanoseconds(), Error: err})
+	lt.writer.PrintResponse(&ResponseLog{Response: resp, DurationNano: respTime.Nanoseconds(), Error: err})
 
 	return resp, err
 }
