@@ -18,7 +18,13 @@ type ResponseLog struct {
 	Error        error
 }
 
+// SimpleLogWriter is interface for writing logs
+type SimpleLogWriter interface {
+	Println(v ...interface{})
+}
+
 // LogWriter is interface for writing logs
 type LogWriter interface {
-	Println(v ...interface{})
+	PrintRequest(req *RequestLog)
+	PrintResponse(resp *ResponseLog)
 }
