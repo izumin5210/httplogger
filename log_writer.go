@@ -11,7 +11,7 @@ type RequestLog struct {
 	RequestedAt time.Time
 }
 
-// RequestLog contains http(s) response information or errors
+// ResponseLog contains http(s) response information or errors
 type ResponseLog struct {
 	*http.Response
 	DurationNano int64

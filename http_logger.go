@@ -1,17 +1,12 @@
 package httplogger
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"net/http/httputil"
 	"strings"
-	"time"
 )
-
-type keyRequestedAt struct{}
 
 const (
 	defaultPrefix = "[http] "
@@ -19,8 +14,8 @@ const (
 
 // httpLogger is interface for logging http request
 type httpLogger interface {
-	LogRequest(req *http.Request) *http.Request
-	LogResponse(resp *http.Response)
+	LogRequest(reqLog *RequestLog)
+	LogResponse(respLog *ResponseLog)
 }
 
 type httpLoggerImpl struct {
@@ -37,31 +32,17 @@ func newHTTPLogger(writer LogWriter) httpLogger {
 	}
 }
 
-func (l *httpLoggerImpl) LogRequest(req *http.Request) *http.Request {
-	dump, _ := httputil.DumpRequest(req, true)
+func (l *httpLoggerImpl) LogRequest(reqLog *RequestLog) {
+	dump, _ := httputil.DumpRequest(reqLog.Request, true)
 	l.writer.Println(fmt.Sprintf("--> %s", strings.Replace(string(dump), "\r\n", "\n", -1)))
-	return setRequestedAt(req)
 }
 
-func (l *httpLoggerImpl) LogResponse(resp *http.Response) {
-	if resp == nil {
+func (l *httpLoggerImpl) LogResponse(respLog *ResponseLog) {
+	if respLog.Response == nil {
 		return
 	}
-	dump, _ := httputil.DumpResponse(resp, true)
+	dump, _ := httputil.DumpResponse(respLog.Response, true)
 	lines := strings.Split(string(dump), "\r\n")
-	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], getRespTimeInMillis(resp))
+	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], respLog.DurationNano/1e6)
 	l.writer.Println(strings.Join(lines, "\n"))
-}
-
-func setRequestedAt(req *http.Request) *http.Request {
-	ctx := context.WithValue(req.Context(), keyRequestedAt{}, time.Now())
-	return req.WithContext(ctx)
-}
-
-func getRequestedAt(resp *http.Response) time.Time {
-	return resp.Request.Context().Value(keyRequestedAt{}).(time.Time)
-}
-
-func getRespTimeInMillis(resp *http.Response) time.Duration {
-	return time.Since(getRequestedAt(resp)) / 1e6
 }

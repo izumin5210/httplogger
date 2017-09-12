@@ -3,6 +3,7 @@ package httplogger
 import (
 	"io"
 	"net/http"
+	"time"
 )
 
 type loggingTransport struct {
@@ -43,8 +44,13 @@ func (lt *loggingTransport) CancelRequest(req *http.Request) {
 }
 
 func (lt *loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req = lt.logger.LogRequest(req)
+	requestedAt := time.Now()
+	lt.logger.LogRequest(&RequestLog{Request: req, RequestedAt: requestedAt})
+
 	resp, err := lt.parentTransport().RoundTrip(req)
-	lt.logger.LogResponse(resp)
+
+	respTime := time.Since(requestedAt)
+	lt.logger.LogResponse(&ResponseLog{Response: resp, DurationNano: respTime.Nanoseconds(), Error: err})
+
 	return resp, err
 }
