@@ -28,7 +28,7 @@ func wrapSimpleLogWriter(writer SimpleLogWriter) LogWriter {
 
 func (l *defaultLogWriter) PrintRequest(reqLog *RequestLog) {
 	dump, _ := httputil.DumpRequest(reqLog.Request, true)
-	l.writer.Println(fmt.Sprintf("--> %s", strings.Replace(string(dump), "\r\n", "\n", -1)))
+	l.writer.Print(fmt.Sprintf("--> %s\n", strings.Replace(string(dump), "\r\n", "\n", -1)))
 }
 
 func (l *defaultLogWriter) PrintResponse(respLog *ResponseLog) {
@@ -38,5 +38,5 @@ func (l *defaultLogWriter) PrintResponse(respLog *ResponseLog) {
 	dump, _ := httputil.DumpResponse(respLog.Response, true)
 	lines := strings.Split(string(dump), "\r\n")
 	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], respLog.DurationNano/1e6)
-	l.writer.Println(strings.Join(lines, "\n"))
+	l.writer.Print(strings.Join(lines, "\n") + "\n")
 }

@@ -20,7 +20,7 @@ type ResponseLog struct {
 
 // SimpleLogWriter is interface for writing logs
 type SimpleLogWriter interface {
-	Println(v ...interface{})
+	Print(v ...interface{})
 }
 
 // LogWriter is interface for writing logs
