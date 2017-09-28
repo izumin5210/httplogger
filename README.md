@@ -3,14 +3,16 @@
 
 ## Usage
 
+### Basic Example
+
 ```go
 func main() {
 	client := &http.Client{
-    TransPort: httplogger.New(os.Stdout, nil),
-  }
-  if _, err := client.Get("http://example.com"); err != nil {
-    log.Fatal(err)
-  }
+		TransPort: httplogger.NewRoundTripper(os.Stdout, nil),
+	 }
+		if _, err := client.Get("http://example.com"); err != nil {
+		log.Fatal(err)
+	}
 }
 ```
 
@@ -27,4 +29,18 @@ Server: nginx
 
 <!DOCTYPE html>
 ...
+```
+
+### Simple Custom Logger
+
+```go
+func main() {
+	logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
+	client := &http.Client{
+		TransPort: httplogger.NewRoundTripper(os.Stdout, nil),
+	}
+	if _, err := client.Get("http://example.com"); err != nil {
+		log.Fatal(err)
+	}
+}
 ```
