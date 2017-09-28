@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 type httpTestContext struct {
@@ -95,4 +96,29 @@ func Test_LoggerRoundTripper(t *testing.T) {
 			t.Errorf("logged %q, wanna contain response body %q", got, want)
 		}
 	}
+}
+
+func Test_LoggerRoundTripper_WhenResponseIsEmpty(t *testing.T) {
+	var (
+		path   = "/ping"
+		status = 500
+	)
+
+	ctx := newHTTPTestContext()
+	defer ctx.server.Close()
+
+	ctx.mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(2 * time.Millisecond)
+		w.WriteHeader(status)
+	})
+
+	buf := bytes.NewBufferString("")
+	client := &http.Client{
+		Transport: NewRoundTripper(buf, nil),
+		Timeout:   1 * time.Millisecond,
+	}
+
+	client.Post(fmt.Sprintf("%s%s", ctx.server.URL, path), "application/json", nil)
+
+	// should not be panic...
 }
