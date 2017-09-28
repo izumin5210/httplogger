@@ -33,8 +33,10 @@ func (l *defaultLogWriter) PrintRequest(reqLog *RequestLog) {
 
 func (l *defaultLogWriter) PrintResponse(respLog *ResponseLog) {
 	if respLog.Response == nil {
+		l.writer.Print(fmt.Sprintf("--> %s (%dms)\n", respLog.Error.Error(), respLog.DurationNano/1e6))
 		return
 	}
+
 	dump, _ := httputil.DumpResponse(respLog.Response, true)
 	lines := strings.Split(string(dump), "\r\n")
 	lines[0] = fmt.Sprintf("<-- %s (%dms)", lines[0], respLog.DurationNano/1e6)
