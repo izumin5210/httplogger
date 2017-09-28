@@ -3,25 +3,26 @@ package httplogger
 import (
 	"io"
 	"net/http"
+	"time"
 )
 
 type loggingTransport struct {
-	logger httpLogger
+	writer LogWriter
 	parent http.RoundTripper
 }
 
 // NewRoundTripper returns new RoundTripper instance for logging http request and response
 func NewRoundTripper(out io.Writer, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
-		logger: defaultHTTTPLogger(out),
+		writer: newDefaultLogWriter(out),
 		parent: parent,
 	}
 }
 
-// FromLogger creates new logging RoundTripper instance with given log writer
-func FromLogger(writer LogWriter, parent http.RoundTripper) http.RoundTripper {
+// FromSimpleLogger creates new logging RoundTripper instance with given log writer
+func FromSimpleLogger(writer SimpleLogWriter, parent http.RoundTripper) http.RoundTripper {
 	return &loggingTransport{
-		logger: newHTTPLogger(writer),
+		writer: wrapSimpleLogWriter(writer),
 		parent: parent,
 	}
 }
@@ -43,8 +44,13 @@ func (lt *loggingTransport) CancelRequest(req *http.Request) {
 }
 
 func (lt *loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req = lt.logger.LogRequest(req)
+	requestedAt := time.Now()
+	lt.writer.PrintRequest(&RequestLog{Request: req, RequestedAt: requestedAt})
+
 	resp, err := lt.parentTransport().RoundTrip(req)
-	lt.logger.LogResponse(resp)
+
+	respTime := time.Since(requestedAt)
+	lt.writer.PrintResponse(&ResponseLog{Response: resp, DurationNano: respTime.Nanoseconds(), Error: err})
+
 	return resp, err
 }
